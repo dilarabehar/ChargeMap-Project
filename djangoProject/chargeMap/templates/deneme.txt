@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Maps</title>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ key }}&callback=initMap"></script>
+  <script>
+    function initMap() {
+        var markedStationData = {{ marked_station | safe }}
+        var latlong = markedStationData[0]
+        var lat ={{ lat | safe }}
+        var lon = {{ lon | safe }}
+        console.log('Marked Station Data:', markedStationData);
+
+         map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: latlong.lat, lng: latlong.lng } ,
+             zoom: 10,
+            // Default center
+        });
+
+        var defaultIcon = 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png';
+
+        const position = {lat: latlong.lat, lng: latlong.lng};
+
+        var marker = new google.maps.Marker({
+            position: position,
+            map: map,
+            title: markedStationData.name,
+            icon: latlong.tech.includes('AC') ? defaultIcon : null
+        });
+
+        marker.addListener('click', function() {
+            var googleMapsUrl = `https://www.google.com/maps/search/${latlong.name}/@${lat},${lon}z?entry=ttu`;
+            window.open(routeDeneme, '_blank');
+        });
+
+}
+    window.initMap = initMap
+  </script>
+</head>
+<body>
+  <div class="pageholder">
+    <div class="titleholder">
+      <div class="title", style="font-size: 50px" >{{ chosen_station.station_name }}</div>
+    </div>
+    <div class="linkholder">
+      <div class="mapholder">
+        <div id="map" style="height: 500px; width: 100%;"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+-------------------------------------------------------------------
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Maps</title>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ key }}&callback=initMap"></script>
+  <script>
+    function initMap() {
+    const directionsService = new google.maps.DirectionsService();
+    const directionsRenderer = new google.maps.DirectionsRenderer();
+
+    var markedStationData = {{ marked_station | safe }};
+    var latlong = markedStationData[0];
+    var lat = {{ lat | safe }};
+    var lon = {{ lon | safe }};
+
+    console.log('Marked Station Data:', markedStationData);
+
+    // Haritayı oluştur
+    var map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: latlong.lat, lng: latlong.lng },
+        zoom: 10
+    });
+
+    directionsRenderer.setMap(map);
+
+    var defaultIcon = 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png';
+
+    var marker = new google.maps.Marker({
+        position: { lat: latlong.lat, lng: latlong.lng },
+        map: map,
+        title: latlong.name,
+        icon: latlong.tech.includes('AC') ? defaultIcon : null
+    });
+
+    navigator.geolocation.getCurrentPosition((position) => {
+        console.log("Latitude is :", position.coords.latitude);
+        console.log("Longitude is :", position.coords.longitude);
+
+        const textFormat_geo = `${position.coords.latitude},${position.coords.longitude}`;
+
+        console.log("Formatted Geo Location:", textFormat_geo);
+
+        marker.addListener('click', function() {
+            calculateAndDisplayRoute(directionsService, directionsRenderer, textFormat_geo);
+        });
+
+        function calculateAndDisplayRoute(directionsService, directionsRenderer, origin) {
+            directionsService.route({
+                origin: origin,
+                destination: new google.maps.LatLng(latlong.lat, latlong.lng),
+                travelMode: google.maps.TravelMode.DRIVING
+            })
+            .then((response) => {
+                directionsRenderer.setDirections(response);
+            })
+            .catch((e) => window.alert("Directions request failed due to " + e));
+        }
+    }, (error) => {
+        console.error('Geolocation error:', error);
+    });
+}
+
+window.initMap = initMap;
+  </script>
+</head>
+<body>
+  <div class="pageholder">
+    <div class="titleholder">
+      <div class="title" style="font-size: 50px">{{ chosen_station.station_name }}</div>
+    </div>
+    <div class="linkholder">
+      <div class="mapholder">
+        <div id="map" style="height: 500px; width: 100%;"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

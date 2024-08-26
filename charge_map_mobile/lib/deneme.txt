@@ -1,0 +1,242 @@
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
+import '../helper/db_helper.dart';
+import '../models/station_model.dart';
+
+class MapPage extends StatefulWidget {
+  const MapPage({super.key});
+
+  @override
+  State<MapPage> createState() => _MapPageState();
+}
+
+class _MapPageState extends State<MapPage> {
+  static const LatLng _pGooglePlex = LatLng(35.925533, 32.866287);
+  late Future<List<EChargeStation>> _stations;
+  Set<Marker> _markers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _requestPermissions();
+    _stations = DatabaseHelper().getAllStations();
+    _stations.then((stations) {
+      setState(() {
+        // Clear existing markers before adding new ones
+        _markers.clear();
+        // Add each marker individually
+        for (var station in stations) {
+          final latLng = _parseLatLng(station.stationCoordinate);
+          print('Adding marker at $latLng');
+          _markers.add(
+            Marker(
+              markerId: MarkerId(station.stationCode ?? ''),
+              position: latLng,
+              infoWindow: InfoWindow(
+                title: station.stationName,
+                snippet: station.stationAddress,
+              ),
+            ),
+          );
+        }
+      });
+    });
+  }
+
+  Future<void> _requestPermissions() async {
+    await [
+      Permission.location,
+      Permission.locationWhenInUse,
+    ].request();
+  }
+
+  LatLng _parseLatLng(String? coordinate) {
+    if (coordinate == null || coordinate.isEmpty) return _pGooglePlex;
+
+    try {
+      // Coordinates are expected to be in the format "36° 5' 7.5984" N 32° 51' 28.0008" E"
+      final parts = coordinate.split(' ');
+      if (parts.length < 8) return _pGooglePlex; // Ensure we have enough parts
+
+      // Extract latitude parts
+      final latDegrees = _parseCoordinate(parts[0]);
+      final latMinutes = _parseCoordinate(parts[1]);
+      final latSeconds = _parseCoordinate(parts[2]);
+      final latDirection = parts[3];
+
+      // Extract longitude parts
+      final lonDegrees = _parseCoordinate(parts[4]);
+      final lonMinutes = _parseCoordinate(parts[5]);
+      final lonSeconds = _parseCoordinate(parts[6]);
+      final lonDirection = parts[7];
+
+      // Convert to decimal degrees
+      double latitude = latDegrees + latMinutes / 60 + latSeconds / 3600;
+      double longitude = lonDegrees + lonMinutes / 60 + lonSeconds / 3600;
+
+      // Adjust for direction
+      if (latDirection == 'S') latitude = -latitude;
+      if (lonDirection == 'W') longitude = -longitude;
+
+      return LatLng(latitude, longitude);
+    } catch (e) {
+      print('Error parsing lat/lng: $e');
+      return _pGooglePlex;
+    }
+  }
+
+  // Helper method to parse coordinate parts (degrees, minutes, seconds)
+  double _parseCoordinate(String coordinatePart) {
+    final number = double.tryParse(coordinatePart.replaceAll(RegExp(r'[^\d.]'), ''));
+    return number ?? 0.0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: FutureBuilder<List<EChargeStation>>(
+        future: _stations,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No data available'));
+          } else {
+            return GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: _pGooglePlex,
+                zoom: 10,
+              ),
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
+              markers: {Marker(
+                markerId: MarkerId('1'),
+                position: LatLng(36.607655, 0.5294444444444445),
+                infoWindow: InfoWindow(title: 'Test Marker 1'),
+              ),}
+            );
+          }
+        },
+      ),
+    );
+  }
+}
+---------------------------------------------------------------------------------------
+
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+
+
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader("UTF-8") { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
+if (flutterVersionCode == null) {
+    flutterVersionCode = "1"
+}
+
+def flutterVersionName = localProperties.getProperty("flutter.versionName")
+if (flutterVersionName == null) {
+    flutterVersionName = "1.0"
+}
+
+android {
+    namespace = "com.example.charge_map_mobile"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId = "com.example.charge_map_mobile"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
+        minSdk = 21
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutterVersionCode.toInteger()
+        versionName = flutterVersionName
+    }
+
+    buildTypes {
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig = signingConfigs.debug
+        }
+
+    }
+}
+flutter {
+    source = "../.."
+}
+
+
+
+
+
+------------------------------------------------------------------------------------------
+
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
+
+
+--------------------------------------------------------------------------------
+pluginManagement {
+    def flutterSdkPath = {
+        def properties = new Properties()
+        file("local.properties").withInputStream { properties.load(it) }
+        def flutterSdkPath = properties.getProperty("flutter.sdk")
+        assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+        return flutterSdkPath
+    }()
+
+    includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
+
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id 'com.android.application' version '8.5.1' apply false
+    id 'com.android.library' version '8.5.1' apply false
+    id 'org.jetbrains.kotlin.android' version '1.9.23' apply false
+}
+
+include ":app"

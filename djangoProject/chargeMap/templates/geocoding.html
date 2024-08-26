@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap List View</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+    <div class="container mt-5">
+        <h2 class="mb-4"> Stations Detail List</h2>
+        <div class="card">
+            <div class="card-header">
+                List of Stations
+            </div>
+            <ul class="list-group list-group-flush">
+                               <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1">{{ chosen_station.station_name }}</h5>
+                        <p class="mb-1">Code: {{ chosen_station.station_code }}</p>
+                        <p class="mb-1">Coordinate: {{ chosen_station.station_coordinate }}</p>
+                        <p class="mb-1">Address: {{ chosen_station.station_address }}</p>
+                        <p class="mb-1">Tech: {{ chosen_station.station_tech }}</p>
+                        <p class="mb-1">Status: {{ chosen_station.station_status }}</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

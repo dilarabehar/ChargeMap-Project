@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap List View</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+    <div class="container mt-5">
+        <h2 class="mb-4">E-Charge Stations List</h2>
+        <div class="card">
+            <div class="card-header">
+                List of Stations
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for station in stations %}
+                    station_id = {{ station.id }}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1">{{ station.station_name }}</h5>
+                        <p class="mb-1">Code: {{ station.station_code }}</p>
+                        <p class="mb-1">Coordinate: {{ station.station_coordinate }}</p>
+                        <p class="mb-1">Address: {{ station.station_address }}</p>
+                        <p class="mb-1">Tech: {{ station.station_tech }}</p>
+                        <p class="mb-1">Status: {{ station.station_status }}</p>
+                    </div>
+               <button class="btn btn-info btn-sm" id="detailsButton" data-station-id="1">Details</button>
+
+                    <script>
+                        document.getElementById('detailsButton').addEventListener('click', function() {
+                            // Get the station ID from the button's data attribute
+                            var stationId = this.getAttribute('station_id');
+
+                            // Construct the URL using the station ID
+                            var url = '/search/' + stationId;
+
+                            // Redirect to the constructed URL
+                            window.location.href = url;
+                        });
+                    </script>
+
+
+                </li>
+                {% empty %}
+                <li class="list-group-item">No stations available.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

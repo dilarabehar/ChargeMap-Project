@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Maps</title>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ key }}&callback=initMap"></script>
+  <script>
+    let marker; // Marker'ı global olarak tanımlıyoruz
+    let map; // Haritayı global olarak tanımlıyoruz
+    let directionsService; // DirectionsService'ı global olarak tanımlıyoruz
+    let directionsRenderer; // DirectionsRenderer'ı global olarak tanımlıyoruz
+
+    function initMap() {
+      directionsService = new google.maps.DirectionsService();
+      directionsRenderer = new google.maps.DirectionsRenderer();
+
+      var markedStationData = {{ marked_station | safe }};
+      var latlong = markedStationData[0];
+      var lat = {{ lat | safe }};
+      var lon = {{ lon | safe }};
+
+      console.log('Marked Station Data:', markedStationData);
+
+      // Haritayı oluştur
+      map = new google.maps.Map(document.getElementById('map'), {
+          center: { lat: latlong.lat, lng: latlong.lng },
+          zoom: 15 // Başlangıçta uygun bir yakınlaştırma seviyesi
+      });
+
+      directionsRenderer.setMap(map);
+
+      var defaultIcon = 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png';
+
+      // Marker'ı oluştur
+      marker = new google.maps.Marker({
+          position: { lat: latlong.lat, lng: latlong.lng },
+          map: map,
+          title: latlong.name,
+          icon: defaultIcon,
+      });
+
+      // Kullanıcının mevcut konumunu sürekli olarak takip et
+      navigator.geolocation.watchPosition((position) => {
+        const userLatLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+
+        // Marker'ın konumunu güncelle
+        marker.setPosition(userLatLng);
+
+        // Kullanıcının mevcut konumundan belirtilen istasyona rota hesapla ve göster
+        calculateAndDisplayRoute(userLatLng);
+
+      }, (error) => {
+        console.error('Geolocation error:', error);
+      });
+
+      function calculateAndDisplayRoute(origin) {
+        directionsService.route({
+            origin: origin,
+            destination: new google.maps.LatLng(latlong.lat, latlong.lng),
+            travelMode: google.maps.TravelMode.DRIVING
+        })
+        .then((response) => {
+            directionsRenderer.setDirections(response);
+
+            // Rota hesaplandıktan sonra haritayı kullanıcı konumuna odakla ve yakınlaştır
+            const bounds = new google.maps.LatLngBounds();
+            bounds.extend(origin);
+            bounds.extend(new google.maps.LatLng(latlong.lat, latlong.lng));
+            map.fitBounds(bounds);
+
+            // Opsiyonel: yakınlaştırma düzeyini ayarlayabilirsiniz
+            const zoomLevel = 30; // İhtiyaca göre ayarlayın
+            map.setZoom(zoomLevel);
+        })
+        .catch((e) => window.alert("Directions request failed due to " + e));
+      }
+    }
+
+    window.initMap = initMap;
+  </script>
+</head>
+<body>
+  <div class="pageholder">
+    <div class="titleholder">
+      <div class="title" style="font-size: 50px">{{ chosen_station.station_name }}</div>
+    </div>
+    <div class="linkholder">
+      <div class="mapholder">
+        <div id="map" style="height: 500px; width: 100%;"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

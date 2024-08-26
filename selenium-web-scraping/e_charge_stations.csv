@@ -1,0 +1,11 @@
+﻿Station Name,Station Code,Station Coordinate,Station Address,Station Tech,Station Status
+" İsa-Ufuk Otomotiv, Mersin",TR-MER-033,"36° 5' 7.5984"" N  32° 51' 28.0008"" E","bahçelievler mah alparslantürkeş bul no:15/A Sanayi sitesi karşısı, Anamur, 33640 Mersin / Türkiye","  DC • CCS (DCCombo) • 30 kW
+ 1000 V • 60 A • MODE4","Pazartesi - Pazar : 24 Saat
+Tatil Günleri : 24 Saat"
+"7.Sense Nature Resort, Sakarya",TR-SAK-009,"40° 40' 39.6984"" N  30° 18' 18.3996"" E","Hacı Mercan Köyü, Orta Sk. No:29, Sapanca, 54600 Sakarya / Türkiye","  DC • CCS (DCCombo) • 120 kW
+ 1000 V • 200 A • MODE4","Pazartesi - Pazar : 07:00 - 23:30
+Tatil Günleri : 07:00 - 23:30"
+"ABC Otomotiv, Ankara",TR-ANK-058,"39° 56' 45.6282"" N  32° 43' 6.9096"" E","İnönü Mah. Fatih Sultan Mehmet Blv. No:414, Yenimahalle, 6370 Ankara / Türkiye","  DC • CCS (DCCombo) • 120 kW
+ 1000 V • 200 A • MODE4","Pazartesi - Cumartesi : 08:30 - 18:00
+Tatil Günleri : 08:30 - 18:00
+Pazar : 11:00 - 18:00"

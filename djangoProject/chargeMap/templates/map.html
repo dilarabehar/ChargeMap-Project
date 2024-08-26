@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Maps API Displaying Markers on the Map</title>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ key }}&callback=initMap"></script>
+  <script>
+    function initMap(){
+
+        var locations = {{ locations|safe}};
+        var firstLocation = locations[0]
+        var infoWindow = []
+
+        map = new google.maps.Map(document.getElementById("map"),{
+            center: { lat: firstLocation.lat, lng: firstLocation.lng },
+            zoom: 5,
+        }
+        );
+
+
+       var defaultIcon = 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png';
+
+        locations.forEach(location => {
+            var marker = new google.maps.Marker({
+                position: { lat: location.lat, lng: location.lng },
+                map: map,
+                title: location.name,
+                icon: location.tech.includes('AC') ? defaultIcon : null
+            });
+
+
+            infoWindowContent =
+          '<div id="content">' +
+          '<h1 id="firstHeading" class="firstHeading">' + location.name + '</h1>' +
+          '<div id="bodyContent">' +
+          '<p><b>Address:</b> ' + location.address + '</p>' +
+          '<p><b>Technology:</b> ' + location.tech + '</p>' +
+          '<p><b>Status:</b> ' + location.status + '</p>' +
+          '<p><b>Code:</b> ' + location.code + '</p>' +
+          '</div>' +
+          '</div>';
+
+            var infowindow = new google.maps.InfoWindow({
+                content: infoWindowContent,
+            });
+
+            infoWindow.push(infowindow)
+
+            marker.addListener('click', function(){
+                infoWindow.forEach(function(iw){
+                    iw.close();
+                });
+
+                infowindow.open(map, marker)
+            });
+        });
+    }
+
+    window.initMap = initMap
+  </script>
+</head>
+<body>
+  <div class="pageholder">
+    <div class="titleholder">
+      <div class="title", style="font-size: 50px" >Google Maps API Displaying Markers on the Map</div>
+    </div>
+    <div class="linkholder">
+      <div class="mapholder">
+        <div id="map" style="height: 500px; width: 100%;"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
