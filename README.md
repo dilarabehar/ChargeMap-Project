@@ -13,6 +13,5 @@ This project features an interactive map application developed using Django and 
 
 ![fsdfsafs](https://github.com/user-attachments/assets/e2903dcf-8e4c-4c38-84fc-a95cf336afc5)
 
-![Ekran görüntüsü 2024-07-26 163515](https://github.com/user-attachments/assets/ed29b569-b19a-4696-9d1f-b32b6c42aeef)
 
 
